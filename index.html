@@ -72,6 +72,7 @@ main{max-width:720px;margin:0 auto;padding:12px 16px}
 .chip.on{background:var(--ink);border-color:var(--ink);color:#fff}
 .card{background:#fff;border-radius:14px;padding:12px;margin-bottom:10px;box-shadow:0 1px 4px #0000000f}
 .tag{display:inline-block;font-size:11.5px;font-weight:800;border-radius:6px;padding:1px 6px;background:var(--sea2);color:var(--sea);margin-left:4px;vertical-align:2px}
+.tag.dk{background:#ffe9e9;color:#d63c3c}
 .tag.went{background:#e6f6ec;color:var(--ok)}
 .stars{font-size:18px;letter-spacing:1px;color:#f5b301}
 .sec{font-weight:800;font-size:17px;margin:18px 0 8px;display:flex;align-items:center;gap:6px}
@@ -170,7 +171,7 @@ main{max-width:720px;margin:0 auto;padding:12px 16px}
 <div class="toast" id="toast"><span id="toT"></span><button id="toB">되돌리기</button></div>
 <script>
 window.onerror=(m,s,l,c)=>{if(/^Script error/.test(m))return;const e=document.getElementById('err');e.style.display='block';e.textContent='⚠️ 오류가 났어요. 이 화면을 캡처해서 보내주세요.\n'+m+' ('+l+':'+c+')';setTimeout(()=>e.style.display='none',9000)};
-const APPVER='20261025b';
+const APPVER='20261025c';
 const DBR='https://matchmaker-28187-default-rtdb.asia-southeast1.firebasedatabase.app/';
 const DB=DBR+'family_trip/',IMGDB=DBR+'family_trip_img/';
 const LK='family_trip_v1';
@@ -349,9 +350,9 @@ function rMap(){const ds_=days();
   $('#myLoc').onclick=()=>{navigator.geolocation?.getCurrentPosition(p=>{const ll=[p.coords.latitude,p.coords.longitude];Lf.circleMarker(ll,{radius:9,color:'#fff',weight:3,fillColor:'#3a8ee6',fillOpacity:1}).addTo(bigMap);bigMap.setView(ll,14)},()=>toast('위치 권한을 허용해 주세요'))}}
 
 /* 맛집·장소 */
-function rPlaces(){const ps=Object.entries(T.places).filter(([k,p])=>p&&(S.cat==='all'||p.cat===S.cat)&&(S.area==='all'||p.area===S.area))
+function rPlaces(){const ps=Object.entries(T.places).filter(([k,p])=>p&&(S.cat==='all'||p.cat===S.cat||(S.cat==='dk'&&p.dk))&&(S.area==='all'||p.area===S.area))
   .sort((a,b)=>(a[1].cat==='stay')-(b[1].cat==='stay')||Object.keys(b[1].like||{}).length-Object.keys(a[1].like||{}).length||(a[1].at||0)-(b[1].at||0));
-  let h=`<div class="chips"><button class="chip ${S.cat==='all'?'on':''}" data-c="all">전체</button>${Object.entries(CATS).map(([c,[e,n]])=>`<button class="chip ${S.cat===c?'on':''}" data-c="${c}">${e} ${n}</button>`).join('')}</div>
+  let h=`<div class="chips"><button class="chip ${S.cat==='all'?'on':''}" data-c="all">전체</button><button class="chip ${S.cat==='dk'?'on':''}" data-c="dk">👹 도깨비 할인</button>${Object.entries(CATS).map(([c,[e,n]])=>`<button class="chip ${S.cat===c?'on':''}" data-c="${c}">${e} ${n}</button>`).join('')}</div>
   <div class="chips"><button class="chip ${S.area==='all'?'on':''}" data-a="all">모든 지역</button>${AREAS.map(a=>`<button class="chip ${S.area===a?'on':''}" data-a="${a}">${a}</button>`).join('')}</div>`;
   h+=ps.length?ps.map(([k,p])=>placeHTML(k,p)).join(''):'<div class="empty">아직 없어요. 가 보고 싶은 곳을 넣어 보세요!</div>';
   h+='<button class="add" id="addPl">＋ 맛집·장소 추가</button><p class="note">👍는 가족 각자 누를 수 있어요. 많이 받은 곳이 위로 올라와요.</p>';
@@ -365,11 +366,11 @@ function rPlaces(){const ps=Object.entries(T.places).filter(([k,p])=>p&&(S.cat==
   $$('[data-img]').forEach(i=>i.onclick=()=>showImg(i.dataset.img,i.src))}
 function placeHTML(k,p){const c=CATS[p.cat]||['📍',''];const lk=Object.keys(p.like||{});const mine=lk.includes(me());
   const stay=p.cat==='stay'&&p.din?`<div class="no">🗓️ ${esc(dlabel(p.din))} ~ ${esc(dlabel(p.dout||p.din))}</div>`:'';
-  return`<div class="card"><div class="r1"><div class="ic">${c[0]}</div><div style="flex:1;min-width:0"><div class="ttl">${esc(p.ti)}${p.area?`<span class="tag">${esc(p.area)}</span>`:''}${p.went?'<span class="tag went">✔ 다녀옴</span>':''}</div>${stay}${p.no?`<div class="no">${linkify(p.no)}</div>`:''}
+  return`<div class="card"><div class="r1"><div class="ic">${c[0]}</div><div style="flex:1;min-width:0"><div class="ttl">${esc(p.ti)}${p.area?`<span class="tag">${esc(p.area)}</span>`:''}${p.went?'<span class="tag went">✔ 다녀옴</span>':''}${p.dk?`<span class="tag dk">👹 ${esc(p.dk.split(' (')[0])}</span>`:''}</div>${stay}${p.no?`<div class="no">${linkify(p.no)}</div>`:''}
   ${p.went&&(p.star||p.rv)?`<div style="margin-top:6px">${p.star?`<span class="stars">${'★'.repeat(p.star)}${'☆'.repeat(5-p.star)}</span>`:''}${p.rv?`<div class="no">💬 ${esc(p.rv)}</div>`:''}</div>`:''}</div></div>${thumbs(p)}
   <div class="acts">${p.cat!=='stay'?`<button class="ab like ${mine?'on':''}" data-lk="${k}">👍 ${lk.length||''}${lk.length?' <small style="font-weight:600">'+esc(lk.join('·'))+'</small>':''}</button>`:''}
   ${hasLoc(p)?`<a class="ab go" target="_blank" href="${mapUrl(p)}">🧭 지도</a>`:''}${p.cat!=='stay'?`<button class="ab" data-tp="${k}">📅 일정에</button><button class="ab" data-wt="${k}">${p.went?'⭐ 후기':'✔ 다녀옴'}</button>`:''}<button class="ab" data-ep="${k}">✏️ 고치기</button></div><div class="by">${byl(p)}</div></div>`}
-function editPlace(k){const p=k?clone(T.places[k]):{cat:S.cat!=='all'?S.cat:'food',area:S.area!=='all'?S.area:'',ti:'',no:'',pl:''};const prev=k?clone(T.places[k]):null;
+function editPlace(k){const p=k?clone(T.places[k]):{cat:CATS[S.cat]?S.cat:'food',area:S.area!=='all'?S.area:'',ti:'',no:'',pl:''};const prev=k?clone(T.places[k]):null;
   const ds_=days();
   sheet(`<h3>${k?'✏️ 장소 고치기':'＋ 맛집·장소 추가'}<button class="x" data-x>✕</button></h3>
   <div class="f"><label>분류</label><div class="seg" id="pC">${Object.entries(CATS).map(([c,[e,n]])=>`<button data-v="${c}">${e} ${n}</button>`).join('')}</div></div>
