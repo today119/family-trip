@@ -170,7 +170,7 @@ main{max-width:720px;margin:0 auto;padding:12px 16px}
 <div class="toast" id="toast"><span id="toT"></span><button id="toB">되돌리기</button></div>
 <script>
 window.onerror=(m,s,l,c)=>{if(/^Script error/.test(m))return;const e=document.getElementById('err');e.style.display='block';e.textContent='⚠️ 오류가 났어요. 이 화면을 캡처해서 보내주세요.\n'+m+' ('+l+':'+c+')';setTimeout(()=>e.style.display='none',9000)};
-const APPVER='20261025a';
+const APPVER='20261025b';
 const DBR='https://matchmaker-28187-default-rtdb.asia-southeast1.firebasedatabase.app/';
 const DB=DBR+'family_trip/',IMGDB=DBR+'family_trip_img/';
 const LK='family_trip_v1';
@@ -455,7 +455,7 @@ function editMoney(k){const v=k?clone(T.money[k]):{cur:'VND',cat:'식비',who:me
 
 /* 정보 */
 function rInfo(){const dc=Object.entries(T.docs).filter(([k,v])=>v).sort((a,b)=>(a[1].o??999)-(b[1].o??999)||(a[1].at-b[1].at));
-  let h=dc.map(([k,v])=>`<div class="card doc"><div class="r1"><div class="ic">${esc(v.ic||'📌')}</div><div style="flex:1;min-width:0"><div class="ttl">${esc(v.ti)}</div></div><button class="mini" data-ed="${k}">✏️ 고치기</button></div><div class="bd">${linkify(v.bd||'')}</div><div class="by">${byl(v)}</div></div>`).join('');
+  let h=dc.map(([k,v])=>`<div class="card doc"><div class="r1"><div class="ic">${esc(v.ic||'📌')}</div><div style="flex:1;min-width:0"><div class="ttl">${esc(v.ti)}</div></div><button class="mini" data-ed="${k}">✏️ 고치기</button></div><div class="bd">${linkify(v.bd||'')}</div>${thumbs(v)}<div class="by">${byl(v)}</div></div>`).join('');
   h+='<button class="add" id="addD">＋ 정보 카드 추가 (예약 번호, 연락처…)</button>';
   h+=`<div class="sec">⚙️ 설정</div>
   <div class="row"><div class="tx">🙂 나는 <b>${esc(me()||'(아직 안 정함)')}</b></div><button class="mini" id="sMe">바꾸기</button></div>
@@ -466,15 +466,15 @@ function rInfo(){const dc=Object.entries(T.docs).filter(([k,v])=>v).sort((a,b)=>
   ${/KAKAOTALK/i.test(navigator.userAgent)?'<div class="warn">카카오톡 안에서 열려 있어요. <a id="ext" href="#">사파리/크롬으로 열기</a>를 눌러 주세요. 그래야 홈 화면에 추가할 수 있어요.</div>':''}
   <div class="row"><div class="tx">🔄 새 버전 확인<div class="by">버전 ${APPVER} · 여행 코드 ${esc(CODE)}</div></div><button class="mini" id="sRl">새로고침</button></div>`;
   $('#m').innerHTML=h;
-  $$('[data-ed]').forEach(b=>b.onclick=()=>editDoc(b.dataset.ed));$('#addD').onclick=()=>editDoc(null);
+  $$('[data-ed]').forEach(b=>b.onclick=()=>editDoc(b.dataset.ed));$$('[data-img]').forEach(i=>i.onclick=()=>showImg(i.dataset.img,i.src));$('#addD').onclick=()=>editDoc(null);
   $('#sMe').onclick=pickMe;$('#sSh').onclick=share;$('#sTr').onclick=editTrip;$('#sTs').onclick=trash;$('#sRl').onclick=async()=>{if(!await checkVer(false))location.reload()};
   if($('#ext'))$('#ext').onclick=e=>{e.preventDefault();location.href='kakaotalk://web/openExternal?url='+encodeURIComponent(location.href)}}
 function editDoc(k){const v=k?clone(T.docs[k]):{ic:'📌',ti:'',bd:''};const prev=k?clone(T.docs[k]):null;
   sheet(`<h3>${k?'✏️ 정보 고치기':'＋ 정보 카드'}<button class="x" data-x>✕</button></h3>
-  <div class="f"><label>아이콘</label><div class="icp" id="dIc">${['📌','✈️','🏨','🚐','🎟️','⚠️','☎️','💳','🛡️','💊','🍽️','🚌','💆','📝'].map(e=>`<button data-ic="${e}" class="${v.ic===e?'on':''}">${e}</button>`).join('')}</div></div>
-  <div class="f"><label>제목</label><input id="dTi" value="${esc(v.ti)}"></div><div class="f"><label>내용</label><textarea id="dBd" style="min-height:180px">${esc(v.bd)}</textarea></div>
+  <div class="f"><label>아이콘</label><div class="icp" id="dIc">${['📌','✈️','🏨','🚐','🎟️','👹','⚠️','☎️','💳','🛡️','💊','🍽️','🚌','💆','📝'].map(e=>`<button data-ic="${e}" class="${v.ic===e?'on':''}">${e}</button>`).join('')}</div></div>
+  <div class="f"><label>제목</label><input id="dTi" value="${esc(v.ti)}"></div><div class="f"><label>내용</label><textarea id="dBd" style="min-height:180px">${esc(v.bd)}</textarea></div>${photoField(v)}
   <div class="btns">${k?'<button class="btn d" id="dDel">🗑️</button>':''}<button class="btn" data-x>취소</button><button class="btn p" id="dSv">저장</button></div>`);
-  $$('#dIc button').forEach(b=>b.onclick=()=>{v.ic=b.dataset.ic;$$('#dIc button').forEach(x=>x.classList.toggle('on',x===b))});
+  bindPhoto(v);$$('#dIc button').forEach(b=>b.onclick=()=>{v.ic=b.dataset.ic;$$('#dIc button').forEach(x=>x.classList.toggle('on',x===b))});
   $('#dSv').onclick=()=>{const ti=$('#dTi').value.trim();if(!ti)return $('#dTi').focus();const id=k||uid();put('docs/'+id,{...v,ti,bd:$('#dBd').value,by:me(),at:Date.now()});closeSheet();toast('저장했어요',()=>put('docs/'+id,prev))};
   if(k)$('#dDel').onclick=()=>{del('docs',k);closeSheet()}}
 function trash(){const tr=Object.entries(T.trash).filter(([k,v])=>v&&v.v).sort((a,b)=>b[1].at-a[1].at);const nm={items:'📅 일정',places:'🍜 장소',pack:'🎒 준비물',money:'💰 경비',docs:'📌 정보'};
