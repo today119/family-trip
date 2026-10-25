@@ -171,7 +171,7 @@ main{max-width:720px;margin:0 auto;padding:12px 16px}
 <div class="toast" id="toast"><span id="toT"></span><button id="toB">되돌리기</button></div>
 <script>
 window.onerror=(m,s,l,c)=>{if(/^Script error/.test(m))return;const e=document.getElementById('err');e.style.display='block';e.textContent='⚠️ 오류가 났어요. 이 화면을 캡처해서 보내주세요.\n'+m+' ('+l+':'+c+')';setTimeout(()=>e.style.display='none',9000)};
-const APPVER='20261025c';
+const APPVER='20261025d';
 const DBR='https://matchmaker-28187-default-rtdb.asia-southeast1.firebasedatabase.app/';
 const DB=DBR+'family_trip/',IMGDB=DBR+'family_trip_img/';
 const LK='family_trip_v1';
@@ -269,7 +269,7 @@ function itemHTML(k,v,next){return`<div class="it ${v.done?'done':''} ${next?'ne
   <div class="r1"><div class="ic">${esc(v.ic||autoIc(v.ti||''))}</div><div style="flex:1;min-width:0"><div class="ttl">${esc(v.ti)}</div>${v.no?`<div class="no">${linkify(v.no)}</div>`:''}</div></div>${thumbs(v)}
   <div class="acts"><button class="ab ck ${v.done?'on':''}" data-ck="${k}">${v.done?'✔ 했어요':'○ 완료'}</button>${hasLoc(v)?`<a class="ab go" target="_blank" href="${mapUrl(v)}">🧭 길찾기</a>`:''}<button class="ab" data-ei="${k}">✏️ 고치기</button></div>
   <div class="by">${byl(v)}</div></div></div>`}
-function linkify(s){return esc(s).replace(/(https?:\/\/[^\s<]+)/g,'<a href="$1" target="_blank">$1</a>')}
+function linkify(s){return esc(s).replace(/(https?:\/\/[^\s<]+)/g,'<a href="$1" target="_blank">$1</a>').replace(/(\+\d{2}[\d ]{7,14}\d)/g,m=>'<a href="tel:'+m.replace(/ /g,'')+'">'+m+'</a>')}
 function bindCommon(){$$('[data-ck]').forEach(b=>b.onclick=()=>{const k=b.dataset.ck,v=T.items[k];put('items/'+k,{...v,done:!v.done,by:me(),at:Date.now()});if(!v.done)toast('✔ 완료 표시했어요')});
   $$('[data-ei]').forEach(b=>b.onclick=()=>editItem(b.dataset.ei));
   $$('[data-img]').forEach(i=>i.onclick=()=>showImg(i.dataset.img,i.src))}
