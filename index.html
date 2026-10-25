@@ -1,0 +1,519 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>우리 가족 여행</title>
+<meta name="theme-color" content="#0f8b8d">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="가족 여행">
+<link rel="manifest" href="manifest.json">
+<link rel="icon" href="icon-192.png">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css">
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<style>
+:root{--sea:#0f8b8d;--sea2:#e3f4f2;--sand:#fff8ee;--coral:#ff7a59;--ink:#22313a;--mut:#7b8a92;--line:#e8e1d6;--card:#fff;--ok:#2fa36b;--warn:#e8590c;color-scheme:light}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;background:var(--sand);color:var(--ink);font-family:"Pretendard Variable",Pretendard,-apple-system,"Apple SD Gothic Neo",sans-serif;font-size:16px}
+body{padding-bottom:calc(76px + env(safe-area-inset-bottom))}
+button{font:inherit;color:inherit;border:0;background:none;cursor:pointer}
+input,textarea,select{font:inherit;color:var(--ink)}
+a{color:var(--sea)}
+.hd{position:sticky;top:0;z-index:50;background:linear-gradient(135deg,#0f8b8d,#2bb3a3);color:#fff;padding:calc(10px + env(safe-area-inset-top)) 16px 12px;box-shadow:0 2px 10px #0002}
+.hd1{display:flex;align-items:center;gap:8px}
+.hd h1{margin:0;font-size:20px;font-weight:800;flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.hd .sub{font-size:13px;opacity:.9;margin-top:2px;display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.dd{background:#fff;color:var(--coral);font-weight:800;border-radius:99px;padding:2px 9px;font-size:13px}
+.pill{background:#ffffff2e;border-radius:99px;padding:6px 11px;font-size:14px;font-weight:700;white-space:nowrap}
+.cl{width:9px;height:9px;border-radius:50%;background:#ffd166;display:inline-block}
+.cl.ok{background:#7CFC9a}.cl.off{background:#ff8a80}
+main{max-width:720px;margin:0 auto;padding:12px 16px}
+.nav{position:fixed;left:0;right:0;bottom:0;z-index:60;background:#fff;border-top:1px solid var(--line);display:grid;grid-template-columns:repeat(6,1fr);padding-bottom:env(safe-area-inset-bottom)}
+.nav button{padding:8px 0 7px;display:flex;flex-direction:column;align-items:center;gap:2px;font-size:11.5px;color:var(--mut);font-weight:600}
+.nav button b{font-size:22px;line-height:1;filter:grayscale(.6);opacity:.75}
+.nav button.on{color:var(--sea)}
+.nav button.on b{filter:none;opacity:1;transform:scale(1.08)}
+.days{display:flex;gap:8px;overflow-x:auto;padding:2px 2px 10px;margin:0 -16px;padding-left:16px;padding-right:16px;scrollbar-width:none}
+.days::-webkit-scrollbar{display:none}
+.dc{flex:0 0 auto;min-width:76px;background:#fff;border:2px solid var(--line);border-radius:14px;padding:7px 10px;text-align:center}
+.dc .n{font-weight:800;font-size:15px}.dc .w{font-size:12px;color:var(--mut)}
+.dc.on{border-color:var(--dcol);background:var(--dcol);color:#fff}.dc.on .w{color:#fffd}
+.dc.td{box-shadow:0 0 0 3px #ffd16699}
+.dhead{border-radius:16px;padding:14px 16px;color:#fff;background:var(--dcol);margin-bottom:12px;position:relative}
+.dhead .t1{font-size:13px;opacity:.9}.dhead .t2{font-size:21px;font-weight:800;margin-top:2px}
+.dhead .ed{position:absolute;right:10px;top:10px;background:#ffffff33;border-radius:99px;padding:5px 10px;font-size:13px;font-weight:700}
+.stay{background:#fff;border:1px dashed var(--sea);border-radius:12px;padding:10px 12px;margin-bottom:12px;font-size:14px;display:flex;gap:8px;align-items:center}
+.stay b{flex:1}
+.tl{position:relative}
+.it{display:grid;grid-template-columns:52px 1fr;gap:0 10px;margin-bottom:10px}
+.it .tm{font-weight:800;font-size:14px;color:var(--sea);padding-top:14px;text-align:right}
+.it .bx{background:var(--card);border-radius:14px;padding:11px 12px;box-shadow:0 1px 4px #0000000f;border:1.5px solid transparent}
+.it.done .bx{opacity:.55}.it.done .ttl{text-decoration:line-through}
+.it.next .bx{border-color:var(--coral);box-shadow:0 0 0 3px #ff7a5922}
+.nowtag{display:inline-block;background:var(--coral);color:#fff;font-size:11px;font-weight:800;border-radius:99px;padding:1px 7px;margin-bottom:4px}
+.r1{display:flex;gap:8px;align-items:flex-start}
+.ic{font-size:24px;line-height:1.1}
+.ttl{font-weight:800;font-size:16.5px;line-height:1.35}
+.no{font-size:14px;color:#4a5a63;margin-top:3px;white-space:pre-wrap;word-break:break-word}
+.by{font-size:11.5px;color:var(--mut);margin-top:5px}
+.acts{display:flex;gap:6px;flex-wrap:wrap;margin-top:8px}
+.ab{border:1.5px solid var(--line);border-radius:99px;padding:5px 11px;font-size:13.5px;font-weight:700;background:#fff;display:inline-flex;align-items:center;gap:4px;text-decoration:none;color:var(--ink)}
+.ab.go{border-color:#bfe3df;color:var(--sea);background:var(--sea2)}
+.ab.ck.on{background:var(--ok);border-color:var(--ok);color:#fff}
+.ab.like.on{background:#fff1ec;border-color:var(--coral);color:var(--coral)}
+.thumbs{display:flex;gap:6px;margin-top:8px;flex-wrap:wrap}
+.thumbs img{width:64px;height:64px;object-fit:cover;border-radius:10px;background:#eee}
+.add{width:100%;border:2px dashed #bcd9d6;color:var(--sea);border-radius:14px;padding:13px;font-weight:800;background:#fff8}
+.chips{display:flex;gap:6px;overflow-x:auto;margin:0 -16px 10px;padding:0 16px;scrollbar-width:none}
+.chips::-webkit-scrollbar{display:none}
+.chip{flex:0 0 auto;border:1.5px solid var(--line);background:#fff;border-radius:99px;padding:6px 12px;font-size:14px;font-weight:700}
+.chip.on{background:var(--ink);border-color:var(--ink);color:#fff}
+.card{background:#fff;border-radius:14px;padding:12px;margin-bottom:10px;box-shadow:0 1px 4px #0000000f}
+.tag{display:inline-block;font-size:11.5px;font-weight:800;border-radius:6px;padding:1px 6px;background:var(--sea2);color:var(--sea);margin-left:4px;vertical-align:2px}
+.tag.went{background:#e6f6ec;color:var(--ok)}
+.stars{font-size:18px;letter-spacing:1px;color:#f5b301}
+.sec{font-weight:800;font-size:17px;margin:18px 0 8px;display:flex;align-items:center;gap:6px}
+.sec small{font-weight:600;color:var(--mut);font-size:13px}
+.prog{height:9px;background:#eadfcf;border-radius:99px;overflow:hidden;margin:4px 0 10px}
+.prog i{display:block;height:100%;background:linear-gradient(90deg,#2bb3a3,#2fa36b);border-radius:99px}
+.row{display:flex;align-items:center;gap:10px;background:#fff;border-radius:12px;padding:10px 12px;margin-bottom:6px}
+.row .tx{flex:1;min-width:0;word-break:break-word}
+.row.done .tx{text-decoration:line-through;color:var(--mut)}
+.cb{width:28px;height:28px;border-radius:8px;border:2px solid #b9c7cc;flex:0 0 auto;display:grid;place-items:center;font-size:17px;color:#fff;font-weight:900}
+.cb.on{background:var(--ok);border-color:var(--ok)}
+.mini{font-size:13px;font-weight:700;color:var(--mut);border:1.5px solid var(--line);border-radius:99px;padding:4px 9px;background:#fff}
+.addrow{display:flex;gap:6px;margin:4px 0 6px}
+.addrow input{flex:1;min-width:0;border:1.5px solid var(--line);border-radius:10px;padding:9px 10px;background:#fff}
+.addrow button{background:var(--sea);color:#fff;border-radius:10px;padding:0 14px;font-weight:800}
+.conv{background:#fff;border-radius:16px;padding:14px;box-shadow:0 1px 4px #0000000f}
+.conv .in{display:flex;align-items:center;gap:8px}
+.conv input{flex:1;min-width:0;font-size:22px;font-weight:800;border:2px solid var(--line);border-radius:12px;padding:8px 10px}
+.conv .out{font-size:24px;font-weight:900;color:var(--coral);margin-top:8px}
+.conv .rt{font-size:12.5px;color:var(--mut);margin-top:4px;display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.qk{display:flex;gap:6px;flex-wrap:wrap;margin-top:8px}
+.big{font-size:26px;font-weight:900}
+.bar{display:flex;align-items:center;gap:8px;font-size:14px;margin:5px 0}
+.bar .lb{width:84px;flex:0 0 auto}
+.bar .bg{flex:1;height:10px;background:#f0e8dc;border-radius:99px;overflow:hidden}
+.bar .bg i{display:block;height:100%;background:var(--coral)}
+.bar .v{width:84px;text-align:right;font-weight:700;flex:0 0 auto}
+.doc .bd{white-space:pre-wrap;word-break:break-word;font-size:14.5px;line-height:1.55;margin-top:6px}
+#map{height:calc(100vh - 230px);min-height:340px;border-radius:16px;overflow:hidden;box-shadow:0 1px 6px #0002}
+.mk{font-size:22px;line-height:30px;width:34px;height:34px;text-align:center;background:#fff;border-radius:50%;box-shadow:0 1px 5px #0005;border:2px solid var(--sea)}
+.mk.st{border-color:var(--coral)}
+.mk.n{font-size:13px;font-weight:900;color:#fff;background:var(--sea);line-height:30px}
+.leaflet-popup-content{font-family:inherit;font-size:14px;margin:10px 12px}
+.ov{position:fixed;inset:0;background:#0007;z-index:100;display:none;align-items:flex-end;justify-content:center}
+.ov.on{display:flex}
+.sh{background:var(--sand);width:100%;max-width:640px;max-height:92vh;overflow:auto;border-radius:20px 20px 0 0;padding:16px 16px calc(18px + env(safe-area-inset-bottom))}
+.sh h3{margin:0 0 12px;font-size:19px;display:flex;align-items:center;gap:8px}
+.sh h3 .x{margin-left:auto;font-size:22px;color:var(--mut);padding:0 4px}
+.f{margin-bottom:12px}
+.f>label{display:block;font-size:13px;font-weight:800;color:var(--mut);margin-bottom:5px}
+.f input,.f textarea,.f select{width:100%;border:1.5px solid var(--line);border-radius:11px;padding:10px 11px;background:#fff;font-size:16px}
+.f textarea{min-height:84px;resize:vertical}
+.two{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.icp{display:flex;flex-wrap:wrap;gap:4px}
+.icp button{font-size:23px;width:40px;height:40px;border-radius:10px;background:#fff;border:1.5px solid var(--line)}
+.icp button.on{border-color:var(--sea);background:var(--sea2)}
+.seg{display:flex;flex-wrap:wrap;gap:6px}
+.seg button{border:1.5px solid var(--line);background:#fff;border-radius:99px;padding:7px 12px;font-weight:700;font-size:14.5px}
+.seg button.on{background:var(--sea);border-color:var(--sea);color:#fff}
+.btns{display:flex;gap:8px;margin-top:14px}
+.btn{flex:1;border-radius:13px;padding:13px;font-weight:800;font-size:16px;background:#fff;border:1.5px solid var(--line)}
+.btn.p{background:var(--sea);border-color:var(--sea);color:#fff}
+.btn.d{color:#d6336c;flex:0 0 auto;padding:13px 16px}
+.mm{height:190px;border-radius:12px;overflow:hidden;margin-top:8px;display:none}
+.res button{display:block;width:100%;text-align:left;background:#fff;border:1px solid var(--line);border-radius:9px;padding:8px 10px;margin-top:4px;font-size:13.5px}
+.toast{position:fixed;left:50%;bottom:calc(88px + env(safe-area-inset-bottom));transform:translateX(-50%) translateY(20px);background:#22313aee;color:#fff;border-radius:99px;padding:10px 8px 10px 16px;font-size:14.5px;z-index:200;display:flex;gap:10px;align-items:center;opacity:0;pointer-events:none;transition:.25s;white-space:nowrap}
+.toast.on{opacity:1;transform:translateX(-50%);pointer-events:auto}
+.toast button{background:#ffd166;color:#222;border-radius:99px;padding:5px 11px;font-weight:800;font-size:13.5px}
+.toast.nu{padding-right:16px}
+.empty{text-align:center;color:var(--mut);padding:26px 10px;font-size:14.5px}
+.pv{position:fixed;inset:0;background:#000e;z-index:150;display:none;align-items:center;justify-content:center;flex-direction:column;gap:12px}
+.pv.on{display:flex}.pv img{max-width:100%;max-height:82vh}
+.pv button{color:#fff;border:1px solid #fff8;border-radius:99px;padding:8px 16px;font-weight:700}
+.who{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.who button{background:#fff;border:2px solid var(--line);border-radius:14px;padding:16px 8px;font-size:18px;font-weight:800}
+.note{font-size:13px;color:var(--mut);line-height:1.5}
+.warn{background:#fff3e6;border:1.5px solid #ffc59a;border-radius:12px;padding:10px 12px;font-size:14px;margin-bottom:10px}
+#err{display:none;position:fixed;top:0;left:0;right:0;z-index:999;background:#c92a2a;color:#fff;font-size:12px;padding:8px;white-space:pre-wrap}
+.ph{display:flex;gap:6px;flex-wrap:wrap}
+.ph .p{position:relative}.ph img{width:70px;height:70px;object-fit:cover;border-radius:10px}
+.ph .p button{position:absolute;top:-6px;right:-6px;background:#d6336c;color:#fff;border-radius:50%;width:22px;height:22px;font-size:13px;font-weight:900}
+.ph .pa{width:70px;height:70px;border-radius:10px;border:2px dashed #bcd9d6;color:var(--sea);font-size:26px}
+</style>
+</head>
+<body>
+<div id="err"></div>
+<header class="hd">
+  <div class="hd1">
+    <h1 id="hT">우리 가족 여행</h1>
+    <button class="pill" id="hMe">🙂 누구?</button>
+    <button class="pill" id="hShare">💬 초대</button>
+  </div>
+  <div class="sub" id="hS"></div>
+</header>
+<main id="m"></main>
+<nav class="nav" id="nav">
+  <button data-t="plan"><b>📅</b>일정</button>
+  <button data-t="map"><b>🗺️</b>지도</button>
+  <button data-t="places"><b>🍜</b>맛집·장소</button>
+  <button data-t="pack"><b>🎒</b>준비물</button>
+  <button data-t="money"><b>💰</b>경비</button>
+  <button data-t="info"><b>📌</b>정보</button>
+</nav>
+<div class="ov" id="ov"><div class="sh" id="sh"></div></div>
+<div class="pv" id="pv"><img id="pvI" alt=""><button id="pvX">닫기</button></div>
+<div class="toast" id="toast"><span id="toT"></span><button id="toB">되돌리기</button></div>
+<script>
+window.onerror=(m,s,l,c)=>{if(/^Script error/.test(m))return;const e=document.getElementById('err');e.style.display='block';e.textContent='⚠️ 오류가 났어요. 이 화면을 캡처해서 보내주세요.\n'+m+' ('+l+':'+c+')';setTimeout(()=>e.style.display='none',9000)};
+const APPVER='20261025a';
+const DBR='https://matchmaker-28187-default-rtdb.asia-southeast1.firebasedatabase.app/';
+const DB=DBR+'family_trip/',IMGDB=DBR+'family_trip_img/';
+const LK='family_trip_v1';
+const COLS=['trip','items','places','pack','money','docs','trash'];
+const $=s=>document.querySelector(s),$$=s=>[...document.querySelectorAll(s)];
+const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const uid=()=>Date.now().toString(36)+Math.random().toString(36).slice(2,6);
+const clone=o=>o==null?o:JSON.parse(JSON.stringify(o));
+const WD=['일','월','화','수','목','금','토'];
+const DCOL=['#f0794f','#3a8ee6','#2bae66','#8b5cf6','#14a3a3','#c2489a','#e0a100','#5b6bd6'];
+let L={};try{L=JSON.parse(localStorage.getItem(LK))||{}}catch(e){}
+L.q=L.q||[];L.cache=L.cache||{};L.me=L.me||{};
+function saveL(){try{localStorage.setItem(LK,JSON.stringify(L))}catch(e){try{const c={};c[CODE]=L.cache[CODE];L.cache=c;localStorage.setItem(LK,JSON.stringify(L))}catch(_){}}}
+let CODE=null,T=null,S={tab:L.tab||'plan',day:null,cat:'all',area:'all',mday:'all'};
+function emptyT(){const t={};COLS.forEach(c=>t[c]={});return t}
+function norm(t){t=t||{};COLS.forEach(c=>{if(!t[c]||typeof t[c]!=='object')t[c]={}});return t}
+const me=()=>L.me[CODE]||'';
+
+/* ---------- 저장·동기화 ---------- */
+function setIn(o,parts,v){let x=o;for(let i=0;i<parts.length-1;i++){if(!x[parts[i]]||typeof x[parts[i]]!=='object')x[parts[i]]={};x=x[parts[i]]}const k=parts[parts.length-1];if(v===null||v===undefined)delete x[k];else x[k]=clone(v)}
+function put(path,v){setIn(T,path.split('/'),v);L.q.push({c:CODE,p:path,v:v===undefined?null:v});L.cache[CODE]=T;saveL();rr();flush()}
+let flushing=false;
+async function flush(){if(flushing||!navigator.onLine)return;flushing=true;try{while(L.q.length){const op=L.q[0];if(op.c!==CODE&&op.c){/* 다른 여행 것도 보냄 */}
+  const url=DB+(op.c||CODE)+'/'+op.p+'.json';
+  const r=await fetch(url,op.v===null?{method:'DELETE'}:{method:'PUT',body:JSON.stringify(op.v)});
+  if(!r.ok){if(r.status>=400&&r.status<500){console.warn('거부됨',op,r.status);L.q.shift();saveL();continue}throw 0}
+  L.q.shift();saveL()}setCloud()}catch(e){setCloud('off')}finally{flushing=false}}
+let es=null,esOk=false;
+function connect(){if(es)es.close();esOk=false;setCloud();
+  try{es=new EventSource(DB+CODE+'.json')}catch(e){setCloud('off');return}
+  es.addEventListener('put',e=>{const m=JSON.parse(e.data);remote(m.path,m.data,false)});
+  es.addEventListener('patch',e=>{const m=JSON.parse(e.data);remote(m.path,m.data,true)});
+  es.onopen=()=>{esOk=true;setCloud()};es.onerror=()=>{esOk=false;setCloud('off')}}
+function remote(path,data,patch){const parts=path.split('/').filter(Boolean);
+  if(!parts.length&&!patch){T=norm(clone(data))}
+  else if(patch){for(const k in data)setIn(T,parts.concat(k.split('/').filter(Boolean)),data[k])}
+  else setIn(T,parts,data);
+  T=norm(T);for(const op of L.q)if(!op.c||op.c===CODE)setIn(T,op.p.split('/'),op.v);
+  esOk=true;L.cache[CODE]=T;saveL();setCloud();rr()}
+function setCloud(s){const el=$('#cl');if(!el)return;const st=s||(esOk&&!L.q.length?'ok':(L.q.length?'wait':'off'));el.className='cl '+(st==='ok'?'ok':st==='off'?'off':'');
+  const tx=$('#clT');if(tx)tx.textContent=st==='ok'?'실시간 공유 중':L.q.length?'보내는 중 '+L.q.length:'오프라인(폰에 저장됨)'}
+addEventListener('online',()=>{flush();connect()});
+document.addEventListener('visibilitychange',()=>{if(!document.hidden&&CODE){flush();if(!esOk)connect();checkVer(true)}});
+
+/* ---------- 도우미 ---------- */
+function ds(d){return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0')}
+const today=()=>ds(new Date());
+function pd(s){const [y,m,d]=s.split('-').map(Number);return new Date(y,m-1,d)}
+function days(){const tr=T.trip;if(!tr.start)return[];const out=[];let d=pd(tr.start);const e=pd(tr.end||tr.start);let g=0;while(d<=e&&g++<40){out.push(ds(d));d.setDate(d.getDate()+1)}return out}
+function dlabel(s){const d=pd(s);return (d.getMonth()+1)+'/'+d.getDate()+' ('+WD[d.getDay()]+')'}
+function dcol(s){const i=days().indexOf(s);return DCOL[(i<0?0:i)%DCOL.length]}
+function ago(at){if(!at)return'';const s=(Date.now()-at)/1000;if(s<60)return'방금';if(s<3600)return Math.floor(s/60)+'분 전';if(s<86400)return Math.floor(s/3600)+'시간 전';return Math.floor(s/86400)+'일 전'}
+const byl=o=>o&&o.by?esc(o.by)+' · '+ago(o.at):'';
+function members(){const m=T.trip.members;return Array.isArray(m)?m:(m?Object.values(m):['엄마','아빠'])}
+function mapUrl(o){if(o.ll&&o.ll.length===2)return'https://www.google.com/maps/dir/?api=1&destination='+o.ll[0]+','+o.ll[1];const q=o.pl||o.ti;return'https://www.google.com/maps/search/?api=1&query='+encodeURIComponent(q+' Phu Quoc')}
+const hasLoc=o=>(o.ll&&o.ll.length===2)||o.pl;
+const KW=[[/비행|항공|출발|공항|귀국|도착|✈/,'✈️'],[/체크인|체크아웃|숙소|리조트|호텔|레지던스/,'🏨'],[/조식|아침/,'🥐'],[/점심|저녁|식사|레스토랑|맛집|국수|쌀국수|분짜|꽈이|해산물|식당|키친/,'🍜'],[/카페|커피/,'☕'],[/사파리|동물|기린/,'🦒'],[/아쿠아리움|수족관/,'🐠'],[/워터파크|아쿠아토피아|수영|물놀이|해변|바다|비치/,'🏊'],[/케이블카/,'🚡'],[/놀이|원더스|테마파크/,'🎢'],[/마사지|스파|이발관/,'💆'],[/쇼핑|마트|시장|야시장/,'🛍️'],[/석양|선셋|노을|키스브리지/,'🌅'],[/이동|픽업|택시|그랩|버스|셔틀|트램/,'🚐'],[/그랜드월드|야경|산책|운하/,'🌃'],[/휴식|쉬기|낮잠/,'😴'],[/사진/,'📸'],[/쇼|공연/,'🎭']];
+function autoIc(t){for(const [r,e] of KW)if(r.test(t))return e;return'📍'}
+const ICS=['✈️','🏨','🥐','🍜','🦐','☕','🍹','🍦','🦒','🐠','🎢','🏊','🏖️','🚡','💆','🛍️','🌅','🌃','🚐','🚕','😴','📸','🎭','⛪','🏝️','🎁','💊','📍'];
+const CATS={food:['🍜','맛집'],spot:['🎡','가볼 곳'],massage:['💆','마사지'],shop:['🛍️','쇼핑'],stay:['🏨','숙소']};
+const AREAS=['북부','중부','남부'];
+const MCATS=['식비','교통','입장·투어','쇼핑','마사지','숙소','기타'];
+
+/* ---------- 화면 ---------- */
+let rT;function rr(){clearTimeout(rT);rT=setTimeout(render,40)}
+function render(){if(!CODE)return;header();$$('#nav button').forEach(b=>b.classList.toggle('on',b.dataset.t===S.tab));
+  const f={plan:rPlan,map:rMap,places:rPlaces,pack:rPack,money:rMoney,info:rInfo}[S.tab]||rPlan;f()}
+function header(){const tr=T.trip;$('#hT').textContent=tr.ti||'우리 가족 여행';document.title=tr.ti||'우리 가족 여행';
+  $('#hMe').textContent=(me()?'🙂 '+me():'🙂 누구?');
+  let dd='';const ds_=days();if(ds_.length){const t=today(),a=pd(ds_[0]),n=pd(t);const diff=Math.round((a-n)/864e5);
+    if(diff>0)dd='출발 D-'+diff;else if(diff===0)dd='오늘 출발! ✈️';else if(ds_.includes(t))dd='여행 '+(ds_.indexOf(t)+1)+'일째';else dd='다녀왔어요 💛'}
+  $('#hS').innerHTML=(ds_.length?esc(dlabel(ds_[0]))+' ~ '+esc(dlabel(ds_[ds_.length-1])):'')+(dd?' <span class="dd">'+dd+'</span>':'')+' <span class="cl" id="cl"></span><span id="clT" style="font-size:12px"></span>';setCloud()}
+
+/* 일정 */
+function curDay(){const ds_=days();if(S.day&&ds_.includes(S.day))return S.day;const t=today();S.day=ds_.includes(t)?t:ds_[0];return S.day}
+function itemsOf(d){return Object.entries(T.items).filter(([k,v])=>v&&v.d===d).sort((a,b)=>(a[1].t||'99:99').localeCompare(b[1].t||'99:99')||(a[1].o||a[1].at||0)-(b[1].o||b[1].at||0))}
+function stayOn(d){return Object.entries(T.places).find(([k,p])=>p&&p.cat==='stay'&&p.din&&p.dout&&p.din<=d&&d<p.dout)}
+function rPlan(){const ds_=days();if(!ds_.length){$('#m').innerHTML='<div class="empty">📌 정보 탭에서 여행 날짜를 먼저 정해 주세요.</div>';return}
+  const d=curDay(),t=today();
+  let h='<div class="days" id="days">'+ds_.map((x,i)=>{const n=itemsOf(x).length;return`<button class="dc ${x===d?'on':''} ${x===t?'td':''}" style="--dcol:${DCOL[i%DCOL.length]}" data-d="${x}"><div class="n">${dlabel(x).split(' ')[0]}</div><div class="w">${WD[pd(x).getDay()]}요일${x===t?' · 오늘':''}</div></button>`}).join('')+'</div>';
+  const dt=(T.trip.dayT||{})['d'+d.replace(/-/g,'')]||'';
+  h+=`<div class="dhead" style="--dcol:${dcol(d)}"><div class="t1">${ds_.indexOf(d)+1}일째 · ${esc(dlabel(d))}</div><div class="t2">${esc(dt||'제목 없는 날')}</div><button class="ed" id="dEd">✏️ 제목</button></div>`;
+  const st=stayOn(d);if(st)h+=`<div class="stay">🏨 <b>오늘 밤: ${esc(st[1].ti)}</b>${hasLoc(st[1])?`<a class="ab go" target="_blank" href="${mapUrl(st[1])}">🧭 길찾기</a>`:''}</div>`;
+  const its=itemsOf(d);let nextId=null;
+  if(d===t){const nw=new Date(),hm=String(nw.getHours()).padStart(2,'0')+':'+String(nw.getMinutes()).padStart(2,'0');const n=its.find(([k,v])=>!v.done&&(!v.t||v.t>=hm))||its.find(([k,v])=>!v.done);if(n)nextId=n[0]}
+  h+='<div class="tl">'+(its.length?its.map(([k,v])=>itemHTML(k,v,k===nextId)).join(''):'<div class="empty">아직 일정이 없어요.<br>아래 ＋ 버튼으로 넣어 보세요.</div>')+'</div>';
+  h+=`<button class="add" id="addIt">＋ ${esc(dlabel(d))} 일정 추가</button>`;
+  $('#m').innerHTML=h;
+  const on=$('.dc.on');if(on&&!S._scrolled){on.scrollIntoView({inline:'center',block:'nearest'});S._scrolled=1}
+  $$('.dc').forEach(b=>b.onclick=()=>{S.day=b.dataset.d;render()});
+  $('#dEd').onclick=()=>editDayTitle(d);$('#addIt').onclick=()=>editItem(null,{d});
+  bindCommon()}
+function thumbs(o){return o.ph&&o.ph.length?'<div class="thumbs">'+o.ph.map(p=>`<img src="${p.th}" data-img="${esc(p.id)}" alt="">`).join('')+'</div>':''}
+function itemHTML(k,v,next){return`<div class="it ${v.done?'done':''} ${next?'next':''}"><div class="tm">${esc(v.t||'')}</div><div class="bx">${next?'<span class="nowtag">다음 일정</span>':''}
+  <div class="r1"><div class="ic">${esc(v.ic||autoIc(v.ti||''))}</div><div style="flex:1;min-width:0"><div class="ttl">${esc(v.ti)}</div>${v.no?`<div class="no">${linkify(v.no)}</div>`:''}</div></div>${thumbs(v)}
+  <div class="acts"><button class="ab ck ${v.done?'on':''}" data-ck="${k}">${v.done?'✔ 했어요':'○ 완료'}</button>${hasLoc(v)?`<a class="ab go" target="_blank" href="${mapUrl(v)}">🧭 길찾기</a>`:''}<button class="ab" data-ei="${k}">✏️ 고치기</button></div>
+  <div class="by">${byl(v)}</div></div></div>`}
+function linkify(s){return esc(s).replace(/(https?:\/\/[^\s<]+)/g,'<a href="$1" target="_blank">$1</a>')}
+function bindCommon(){$$('[data-ck]').forEach(b=>b.onclick=()=>{const k=b.dataset.ck,v=T.items[k];put('items/'+k,{...v,done:!v.done,by:me(),at:Date.now()});if(!v.done)toast('✔ 완료 표시했어요')});
+  $$('[data-ei]').forEach(b=>b.onclick=()=>editItem(b.dataset.ei));
+  $$('[data-img]').forEach(i=>i.onclick=()=>showImg(i.dataset.img,i.src))}
+function editDayTitle(d){const key='d'+d.replace(/-/g,'');const cur=(T.trip.dayT||{})[key]||'';
+  sheet(`<h3>📅 ${esc(dlabel(d))} 제목<button class="x" data-x>✕</button></h3><div class="f"><input id="dtI" value="${esc(cur)}" placeholder="예: 사파리 & 그랜드월드"></div><div class="btns"><button class="btn" data-x>취소</button><button class="btn p" id="dtS">저장</button></div>`);
+  $('#dtS').onclick=()=>{const dt={...(T.trip.dayT||{})};dt[key]=$('#dtI').value.trim();put('trip/dayT',dt);closeSheet()}}
+
+/* 일정 고치기 시트 */
+function editItem(k,init){const v=k?clone(T.items[k]):{d:init.d,t:'',ti:'',no:'',pl:'',ic:''};const prev=k?clone(T.items[k]):null;let icM=!!(k&&v.ic);
+  const ds_=days();
+  sheet(`<h3>${k?'✏️ 일정 고치기':'＋ 일정 추가'}<button class="x" data-x>✕</button></h3>
+  <div class="f"><label>무엇을 하나요?</label><input id="eTi" value="${esc(v.ti)}" placeholder="예: 빈원더스 놀이공원"></div>
+  <div class="two"><div class="f"><label>날짜</label><select id="eD">${ds_.map(x=>`<option value="${x}" ${x===v.d?'selected':''}>${dlabel(x)}</option>`).join('')}</select></div>
+  <div class="f"><label>시간 (비워도 돼요)</label><input id="eT" type="time" value="${esc(v.t)}"></div></div>
+  <div class="f"><label>아이콘</label><div class="icp" id="eIc">${ICS.map(e=>`<button data-ic="${e}">${e}</button>`).join('')}</div></div>
+  <div class="f"><label>메모</label><textarea id="eNo" placeholder="준비물, 예약 번호, 주의할 점…">${esc(v.no)}</textarea></div>
+  ${locField(v)}
+  ${photoField(v)}
+  <div class="btns">${k?'<button class="btn d" id="eDel">🗑️ 지우기</button>':''}<button class="btn" data-x>취소</button><button class="btn p" id="eSv">저장</button></div>`);
+  const syncIc=()=>{const cur=icM?v.ic:autoIc($('#eTi').value);$$('#eIc button').forEach(b=>b.classList.toggle('on',b.dataset.ic===cur))};
+  $$('#eIc button').forEach(b=>b.onclick=()=>{v.ic=b.dataset.ic;icM=true;syncIc()});$('#eTi').oninput=syncIc;syncIc();
+  bindLoc(v);bindPhoto(v);
+  $('#eSv').onclick=()=>{const ti=$('#eTi').value.trim();if(!ti){$('#eTi').focus();return}
+    const nv={...v,ti,d:$('#eD').value,t:$('#eT').value,no:$('#eNo').value.trim(),pl:$('#lPl').value.trim(),ic:icM?v.ic:autoIc(ti),by:me(),at:Date.now()};
+    if(!nv.pl)delete nv.pl;const id=k||uid();put('items/'+id,nv);closeSheet();
+    if(nv.d!==S.day){S.day=nv.d}
+    toast(k?'저장했어요':'일정을 넣었어요',()=>{put('items/'+id,prev)});render()};
+  if(k)$('#eDel').onclick=()=>{del('items',k);closeSheet()}}
+function del(col,k){const v=clone(T[col][k]);if(!v)return;const tid=uid();put('trash/'+tid,{col,id:k,v,by:me(),at:Date.now()});put(col+'/'+k,null);
+  const tr=Object.entries(T.trash).sort((a,b)=>b[1].at-a[1].at);tr.slice(60).forEach(([x])=>put('trash/'+x,null));
+  toast('지웠어요',()=>{put(col+'/'+k,v);put('trash/'+tid,null)})}
+
+/* 위치 */
+function locField(v){return`<div class="f"><label>장소 (지도·길찾기용)</label><div class="addrow" style="margin:0"><input id="lPl" value="${esc(v.pl||'')}" placeholder="예: VinWonders Phu Quoc"><button id="lFind" style="white-space:nowrap">🔎 찾기</button></div>
+  <div class="res" id="lRes"></div><div class="note" id="lSt" style="margin-top:6px">${v.ll?'📍 지도에 위치가 찍혀 있어요':'영어 이름으로 찾으면 잘 나와요. 지도를 눌러 직접 찍어도 돼요.'}</div>
+  <div class="acts" style="margin-top:6px"><button class="mini" id="lMap">🗺️ 지도에서 위치 찍기</button>${v.ll?'<button class="mini" id="lClr">위치 지우기</button>':''}</div><div class="mm" id="mm"></div></div>`}
+let mmap=null,mmk=null;
+function bindLoc(v){const show=()=>{const el=$('#mm');el.style.display='block';if(mmap){mmap.remove();mmap=null}
+    mmap=L_map(el,v.ll||[10.22,103.96],v.ll?14:10);if(v.ll)mmk=Lf.marker(v.ll).addTo(mmap);
+    mmap.on('click',e=>{v.ll=[+e.latlng.lat.toFixed(6),+e.latlng.lng.toFixed(6)];if(mmk)mmk.setLatLng(v.ll);else mmk=Lf.marker(v.ll).addTo(mmap);$('#lSt').textContent='📍 위치를 찍었어요'})};
+  $('#lMap').onclick=show;if($('#lClr'))$('#lClr').onclick=()=>{delete v.ll;$('#lSt').textContent='위치를 지웠어요';$('#lClr').remove()};
+  $('#lFind').onclick=async()=>{const q=$('#lPl').value.trim();if(!q)return;$('#lRes').innerHTML='<div class="note">찾는 중…</div>';
+    try{const r=await fetch('https://nominatim.openstreetmap.org/search?format=json&limit=5&accept-language=ko&viewbox=103.78,10.48,104.12,9.85&bounded=1&q='+encodeURIComponent(q));const a=await r.json();
+      if(!a.length){$('#lRes').innerHTML='<div class="note">못 찾았어요 😢 영어 이름으로 바꿔 보거나 지도에서 직접 찍어 주세요.</div>';return}
+      $('#lRes').innerHTML=a.map((x,i)=>`<button data-r="${i}">📍 ${esc(x.display_name.split(',').slice(0,3).join(','))}</button>`).join('');
+      $$('#lRes [data-r]').forEach(b=>b.onclick=()=>{const x=a[+b.dataset.r];v.ll=[+(+x.lat).toFixed(6),+(+x.lon).toFixed(6)];$('#lRes').innerHTML='';$('#lSt').textContent='📍 위치를 찍었어요: '+x.display_name.split(',')[0];show()})}catch(e){$('#lRes').innerHTML='<div class="note">인터넷 연결을 확인해 주세요.</div>'}}}
+const Lf=window.L;
+function L_map(el,c,z){const m=Lf.map(el,{zoomControl:true,attributionControl:true}).setView(c,z);Lf.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png',{maxZoom:19,attribution:'© OpenStreetMap'}).addTo(m);setTimeout(()=>m.invalidateSize(),200);return m}
+
+/* 사진 */
+function photoField(v){v.ph=v.ph||[];return`<div class="f"><label>사진</label><div class="ph" id="phB"></div><input type="file" id="phF" accept="image/*" multiple hidden></div>`}
+function bindPhoto(v){const draw=()=>{$('#phB').innerHTML=v.ph.map((p,i)=>`<div class="p"><img src="${p.th}" alt=""><button data-pd="${i}">✕</button></div>`).join('')+(v.ph.length<8?'<button class="pa" id="phA">📷</button>':'');
+    $$('#phB [data-pd]').forEach(b=>b.onclick=()=>{v.ph.splice(+b.dataset.pd,1);draw()});if($('#phA'))$('#phA').onclick=()=>$('#phF').click()};
+  $('#phF').onchange=async e=>{for(const f of [...e.target.files].slice(0,8-v.ph.length)){try{const img=await loadImg(f);const th=shrink(img,220,.7);let big,mx=1400,q=.78;do{big=shrink(img,mx,q);mx-=200;q-=.05}while(big.length>680000&&mx>500);
+      const id=uid().toLowerCase().slice(0,16);v.ph.push({id,th});draw();imgCache[id]=big;
+      fetch(IMGDB+CODE+'/'+id+'.json',{method:'PUT',body:JSON.stringify(big)}).then(r=>{if(!r.ok)throw 0}).catch(()=>toast('사진 올리기 실패 — 인터넷 될 때 다시 넣어 주세요'))}catch(err){toast('사진을 못 읽었어요')}}e.target.value=''};draw()}
+function loadImg(f){return new Promise((ok,no)=>{const u=URL.createObjectURL(f);const i=new Image();i.onload=()=>ok(i);i.onerror=no;i.src=u})}
+function shrink(img,mx,q){const s=Math.min(1,mx/Math.max(img.width,img.height));const c=document.createElement('canvas');c.width=Math.round(img.width*s);c.height=Math.round(img.height*s);c.getContext('2d').drawImage(img,0,0,c.width,c.height);return c.toDataURL('image/jpeg',q)}
+const imgCache={};
+async function showImg(id,th){$('#pvI').src=imgCache[id]||th;$('#pv').classList.add('on');if(!imgCache[id]){try{const r=await fetch(IMGDB+CODE+'/'+id+'.json');const d=await r.json();if(d){imgCache[id]=d;$('#pvI').src=d}}catch(e){}}}
+$('#pvX').onclick=$('#pv').onclick=e=>{if(e.target.id!=='pvI')$('#pv').classList.remove('on')};
+
+/* 지도 탭 */
+let bigMap=null;
+function rMap(){const ds_=days();
+  $('#m').innerHTML=`<div class="chips" id="mch"><button class="chip ${S.mday==='all'?'on':''}" data-md="all">전체</button><button class="chip ${S.mday==='pl'?'on':''}" data-md="pl">🍜 장소만</button>${ds_.map((x,i)=>`<button class="chip ${S.mday===x?'on':''}" data-md="${x}">${dlabel(x).split(' ')[0]}</button>`).join('')}</div><div id="map"></div><div class="acts"><button class="ab" id="myLoc">📍 내 위치</button><span class="note">일정·장소에 위치를 찍으면 여기에 나와요.</span></div>`;
+  $$('#mch [data-md]').forEach(b=>b.onclick=()=>{S.mday=b.dataset.md;rMap()});
+  if(bigMap){bigMap.remove();bigMap=null}bigMap=L_map($('#map'),[10.2,103.96],10);
+  const pts=[];
+  const add=(ll,html,pop,cls)=>{const m=Lf.marker(ll,{icon:Lf.divIcon({className:'',html:`<div class="mk ${cls||''}">${html}</div>`,iconSize:[34,34],iconAnchor:[17,17]})}).addTo(bigMap).bindPopup(pop);pts.push(ll);return m};
+  const pop=(o,sub)=>`<b>${esc(o.ti)}</b>${sub?'<br><span style="color:#7b8a92">'+esc(sub)+'</span>':''}<br><a target="_blank" href="${mapUrl(o)}">🧭 구글지도 길찾기</a>`;
+  if(S.mday!=='pl'){const dl=S.mday==='all'?ds_:[S.mday];dl.forEach(d=>{const its=itemsOf(d).filter(([k,v])=>v.ll);
+      if(S.mday!=='all'&&its.length>1)Lf.polyline(its.map(([k,v])=>v.ll),{color:dcol(d),weight:4,opacity:.7,dashArray:'6 8'}).addTo(bigMap);
+      its.forEach(([k,v],i)=>add(v.ll,S.mday==='all'?esc(v.ic||autoIc(v.ti)):(i+1),pop(v,dlabel(d)+' '+(v.t||'')),S.mday==='all'?'':'n'))})}
+  if(S.mday==='all'||S.mday==='pl')Object.values(T.places).forEach(p=>{if(p&&p.ll)add(p.ll,(CATS[p.cat]||['📍'])[0],pop(p,(CATS[p.cat]||['',''])[1]+(p.area?' · '+p.area:'')),'st')});
+  if(S.mday!=='all'&&S.mday!=='pl'){const st=stayOn(S.mday);if(st&&st[1].ll)add(st[1].ll,'🏨',pop(st[1],'오늘 밤 숙소'),'st')}
+  if(pts.length)bigMap.fitBounds(pts,{padding:[30,30],maxZoom:14});
+  $('#myLoc').onclick=()=>{navigator.geolocation?.getCurrentPosition(p=>{const ll=[p.coords.latitude,p.coords.longitude];Lf.circleMarker(ll,{radius:9,color:'#fff',weight:3,fillColor:'#3a8ee6',fillOpacity:1}).addTo(bigMap);bigMap.setView(ll,14)},()=>toast('위치 권한을 허용해 주세요'))}}
+
+/* 맛집·장소 */
+function rPlaces(){const ps=Object.entries(T.places).filter(([k,p])=>p&&(S.cat==='all'||p.cat===S.cat)&&(S.area==='all'||p.area===S.area))
+  .sort((a,b)=>(a[1].cat==='stay')-(b[1].cat==='stay')||Object.keys(b[1].like||{}).length-Object.keys(a[1].like||{}).length||(a[1].at||0)-(b[1].at||0));
+  let h=`<div class="chips"><button class="chip ${S.cat==='all'?'on':''}" data-c="all">전체</button>${Object.entries(CATS).map(([c,[e,n]])=>`<button class="chip ${S.cat===c?'on':''}" data-c="${c}">${e} ${n}</button>`).join('')}</div>
+  <div class="chips"><button class="chip ${S.area==='all'?'on':''}" data-a="all">모든 지역</button>${AREAS.map(a=>`<button class="chip ${S.area===a?'on':''}" data-a="${a}">${a}</button>`).join('')}</div>`;
+  h+=ps.length?ps.map(([k,p])=>placeHTML(k,p)).join(''):'<div class="empty">아직 없어요. 가 보고 싶은 곳을 넣어 보세요!</div>';
+  h+='<button class="add" id="addPl">＋ 맛집·장소 추가</button><p class="note">👍는 가족 각자 누를 수 있어요. 많이 받은 곳이 위로 올라와요.</p>';
+  $('#m').innerHTML=h;
+  $$('[data-c]').forEach(b=>b.onclick=()=>{S.cat=b.dataset.c;render()});$$('[data-a]').forEach(b=>b.onclick=()=>{S.area=b.dataset.a;render()});
+  $('#addPl').onclick=()=>editPlace(null);
+  $$('[data-lk]').forEach(b=>b.onclick=()=>{const k=b.dataset.lk,p=T.places[k];if(!me())return pickMe();const lk={...(p.like||{})};if(lk[me()])delete lk[me()];else lk[me()]=1;put('places/'+k+'/like',Object.keys(lk).length?lk:null)});
+  $$('[data-wt]').forEach(b=>b.onclick=()=>review(b.dataset.wt));
+  $$('[data-ep]').forEach(b=>b.onclick=()=>editPlace(b.dataset.ep));
+  $$('[data-tp]').forEach(b=>b.onclick=()=>toPlan(b.dataset.tp));
+  $$('[data-img]').forEach(i=>i.onclick=()=>showImg(i.dataset.img,i.src))}
+function placeHTML(k,p){const c=CATS[p.cat]||['📍',''];const lk=Object.keys(p.like||{});const mine=lk.includes(me());
+  const stay=p.cat==='stay'&&p.din?`<div class="no">🗓️ ${esc(dlabel(p.din))} ~ ${esc(dlabel(p.dout||p.din))}</div>`:'';
+  return`<div class="card"><div class="r1"><div class="ic">${c[0]}</div><div style="flex:1;min-width:0"><div class="ttl">${esc(p.ti)}${p.area?`<span class="tag">${esc(p.area)}</span>`:''}${p.went?'<span class="tag went">✔ 다녀옴</span>':''}</div>${stay}${p.no?`<div class="no">${linkify(p.no)}</div>`:''}
+  ${p.went&&(p.star||p.rv)?`<div style="margin-top:6px">${p.star?`<span class="stars">${'★'.repeat(p.star)}${'☆'.repeat(5-p.star)}</span>`:''}${p.rv?`<div class="no">💬 ${esc(p.rv)}</div>`:''}</div>`:''}</div></div>${thumbs(p)}
+  <div class="acts">${p.cat!=='stay'?`<button class="ab like ${mine?'on':''}" data-lk="${k}">👍 ${lk.length||''}${lk.length?' <small style="font-weight:600">'+esc(lk.join('·'))+'</small>':''}</button>`:''}
+  ${hasLoc(p)?`<a class="ab go" target="_blank" href="${mapUrl(p)}">🧭 지도</a>`:''}${p.cat!=='stay'?`<button class="ab" data-tp="${k}">📅 일정에</button><button class="ab" data-wt="${k}">${p.went?'⭐ 후기':'✔ 다녀옴'}</button>`:''}<button class="ab" data-ep="${k}">✏️ 고치기</button></div><div class="by">${byl(p)}</div></div>`}
+function editPlace(k){const p=k?clone(T.places[k]):{cat:S.cat!=='all'?S.cat:'food',area:S.area!=='all'?S.area:'',ti:'',no:'',pl:''};const prev=k?clone(T.places[k]):null;
+  const ds_=days();
+  sheet(`<h3>${k?'✏️ 장소 고치기':'＋ 맛집·장소 추가'}<button class="x" data-x>✕</button></h3>
+  <div class="f"><label>분류</label><div class="seg" id="pC">${Object.entries(CATS).map(([c,[e,n]])=>`<button data-v="${c}">${e} ${n}</button>`).join('')}</div></div>
+  <div class="f"><label>이름</label><input id="pTi" value="${esc(p.ti)}" placeholder="예: 분꽈이 (쌀국수)"></div>
+  <div class="f"><label>지역</label><div class="seg" id="pA">${AREAS.map(a=>`<button data-v="${a}">${a}</button>`).join('')}<button data-v="">모름</button></div></div>
+  <div class="two" id="pStay" style="display:none"><div class="f"><label>체크인</label><select id="pIn">${ds_.map(x=>`<option value="${x}" ${x===p.din?'selected':''}>${dlabel(x)}</option>`).join('')}</select></div><div class="f"><label>체크아웃</label><select id="pOut">${ds_.map(x=>`<option value="${x}" ${x===p.dout?'selected':''}>${dlabel(x)}</option>`).join('')}</select></div></div>
+  <div class="f"><label>메모</label><textarea id="pNo" placeholder="대표 메뉴, 가격, 영업시간, 예약 번호…">${esc(p.no)}</textarea></div>
+  ${locField(p)}${photoField(p)}
+  <div class="btns">${k?'<button class="btn d" id="pDel">🗑️</button>':''}<button class="btn" data-x>취소</button><button class="btn p" id="pSv">저장</button></div>`);
+  const seg=(id,key)=>{const sync=()=>{$$('#'+id+' button').forEach(b=>b.classList.toggle('on',b.dataset.v===(p[key]||'')));$('#pStay').style.display=p.cat==='stay'?'grid':'none'};$$('#'+id+' button').forEach(b=>b.onclick=()=>{p[key]=b.dataset.v;sync()});sync()};
+  seg('pC','cat');seg('pA','area');bindLoc(p);bindPhoto(p);
+  $('#pSv').onclick=()=>{const ti=$('#pTi').value.trim();if(!ti){$('#pTi').focus();return}
+    const nv={...p,ti,no:$('#pNo').value.trim(),pl:$('#lPl').value.trim(),by:me(),at:Date.now()};if(nv.cat==='stay'){nv.din=$('#pIn').value;nv.dout=$('#pOut').value}else{delete nv.din;delete nv.dout}
+    if(!nv.pl)delete nv.pl;const id=k||uid();put('places/'+id,nv);closeSheet();toast(k?'저장했어요':'넣었어요',()=>put('places/'+id,prev))};
+  if(k)$('#pDel').onclick=()=>{del('places',k);closeSheet()}}
+function review(k){const p=T.places[k];let star=p.star||0;
+  sheet(`<h3>⭐ ${esc(p.ti)} 후기<button class="x" data-x>✕</button></h3><div class="f"><label>별점</label><div class="stars" id="rS" style="font-size:34px"></div></div>
+  <div class="f"><label>한 줄 후기</label><input id="rV" value="${esc(p.rv||'')}" placeholder="예: 새우 쌀국수 최고! 아이들도 잘 먹음"></div>
+  <div class="btns">${p.went?'<button class="btn d" id="rNo">안 감</button>':''}<button class="btn" data-x>취소</button><button class="btn p" id="rSv">✔ 다녀왔어요</button></div>`);
+  const draw=()=>{$('#rS').innerHTML=[1,2,3,4,5].map(i=>`<button data-s="${i}" style="color:#f5b301">${i<=star?'★':'☆'}</button>`).join('');$$('#rS [data-s]').forEach(b=>b.onclick=()=>{star=+b.dataset.s;draw()})};draw();
+  $('#rSv').onclick=()=>{put('places/'+k,{...p,went:true,star:star||null,rv:$('#rV').value.trim()||null,by:me(),at:Date.now()});closeSheet();toast('후기 고마워요 💛')};
+  if($('#rNo'))$('#rNo').onclick=()=>{put('places/'+k,{...p,went:false,by:me(),at:Date.now()});closeSheet()}}
+function toPlan(k){const p=T.places[k];const ds_=days();
+  sheet(`<h3>📅 일정에 넣기<button class="x" data-x>✕</button></h3><p class="note">「${esc(p.ti)}」을(를) 언제 갈까요?</p><div class="two"><div class="f"><label>날짜</label><select id="tD">${ds_.map(x=>`<option value="${x}" ${x===curDay()?'selected':''}>${dlabel(x)}</option>`).join('')}</select></div><div class="f"><label>시간</label><input type="time" id="tT"></div></div>
+  <div class="btns"><button class="btn" data-x>취소</button><button class="btn p" id="tSv">넣기</button></div>`);
+  $('#tSv').onclick=()=>{const it={d:$('#tD').value,t:$('#tT').value,ti:p.ti,no:p.no||'',ic:(CATS[p.cat]||['📍'])[0],by:me(),at:Date.now()};if(p.pl)it.pl=p.pl;if(p.ll)it.ll=p.ll;const id=uid();put('items/'+id,it);closeSheet();S.day=it.d;toast('일정에 넣었어요',()=>put('items/'+id,null))}}
+
+/* 준비물 */
+function rPack(){const all=Object.entries(T.pack).filter(([k,v])=>v);const done=all.filter(([k,v])=>v.done).length;
+  const groups=[['todo','✅ 예약·준비 할 일'],['common','👨‍👩‍👧‍👦 함께 쓰는 것']].concat(members().map(m=>[m,'🧳 '+m+' 짐']));
+  let h=`<div class="card"><b>준비 ${done} / ${all.length}</b><div class="prog"><i style="width:${all.length?done/all.length*100:0}%"></i></div><div class="note">체크하면 가족 모두에게 바로 보여요.</div></div>`;
+  for(const [g,n] of groups){const its=all.filter(([k,v])=>(v.g||'common')===g).sort((a,b)=>(a[1].done-b[1].done)||((a[1].o||a[1].at)-(b[1].o||b[1].at)));
+    const dn=its.filter(([k,v])=>v.done).length;
+    h+=`<div class="sec">${n} <small>${dn}/${its.length}</small></div>`+its.map(([k,v])=>`<div class="row ${v.done?'done':''}"><button class="cb ${v.done?'on':''}" data-pk="${k}">${v.done?'✓':''}</button><div class="tx">${esc(v.t)}${v.done&&v.by?`<div class="by">${byl(v)}</div>`:''}</div><button class="mini" data-pe="${k}">✏️</button></div>`).join('')+
+      `<div class="addrow"><input placeholder="＋ ${g==='todo'?'할 일':'챙길 것'} 추가" data-pa="${esc(g)}"><button data-pb="${esc(g)}">넣기</button></div>`}
+  $('#m').innerHTML=h;
+  $$('[data-pk]').forEach(b=>b.onclick=()=>{const k=b.dataset.pk,v=T.pack[k];put('pack/'+k,{...v,done:!v.done,by:me(),at:Date.now()})});
+  const addP=g=>{const i=$(`[data-pa="${CSS.escape(g)}"]`);const t=i.value.trim();if(!t)return;t.split(/[,，\n]/).map(s=>s.trim()).filter(Boolean).forEach((s,j)=>put('pack/'+uid()+j,{g,t:s,done:false,by:me(),at:Date.now()+j}));i.value='';setTimeout(()=>{const n=$(`[data-pa="${CSS.escape(g)}"]`);n&&n.focus()},60)};
+  $$('[data-pb]').forEach(b=>b.onclick=()=>addP(b.dataset.pb));$$('[data-pa]').forEach(i=>i.onkeydown=e=>{if(e.key==='Enter'&&!e.isComposing)addP(i.dataset.pa)});
+  $$('[data-pe]').forEach(b=>b.onclick=()=>{const k=b.dataset.pe,v=T.pack[k];
+    sheet(`<h3>✏️ 고치기<button class="x" data-x>✕</button></h3><div class="f"><input id="pkT" value="${esc(v.t)}"></div><div class="f"><label>누구 것?</label><div class="seg" id="pkG">${groups.map(([g,n])=>`<button data-v="${esc(g)}" class="${(v.g||'common')===g?'on':''}">${esc(n)}</button>`).join('')}</div></div>
+    <div class="btns"><button class="btn d" id="pkD">🗑️ 지우기</button><button class="btn" data-x>취소</button><button class="btn p" id="pkS">저장</button></div>`);
+    let g=v.g||'common';$$('#pkG button').forEach(x=>x.onclick=()=>{g=x.dataset.v;$$('#pkG button').forEach(y=>y.classList.toggle('on',y===x))});
+    $('#pkS').onclick=()=>{put('pack/'+k,{...v,t:$('#pkT').value.trim()||v.t,g,by:me(),at:Date.now()});closeSheet()};$('#pkD').onclick=()=>{del('pack',k);closeSheet()}})}
+
+/* 경비 */
+function rate(){return T.trip.rate||L.rate||0.054}
+const won=n=>Math.round(n).toLocaleString('ko-KR')+'원';
+const vnd=n=>Math.round(n).toLocaleString('ko-KR')+'₫';
+function toKRW(e){const a=+e.amt||0;return e.cur==='VND'?a*rate():e.cur==='USD'?a*(T.trip.usd||1400):a}
+function parseAmt(s){s=String(s).replace(/[,\s원₫동]/g,'').toLowerCase();let m=1;if(/k$/.test(s)){m=1000;s=s.slice(0,-1)}else if(/만$/.test(s)){m=10000;s=s.slice(0,-1)}return (parseFloat(s)||0)*m}
+function rMoney(){const es_=Object.entries(T.money).filter(([k,v])=>v).sort((a,b)=>(b[1].d||'').localeCompare(a[1].d||'')||(b[1].at-a[1].at));
+  const tot=es_.reduce((s,[k,v])=>s+toKRW(v),0);
+  let h=`<div class="conv"><b>💱 동 → 원 계산기</b><div class="in" style="margin-top:8px"><input id="cv" inputmode="decimal" placeholder="예: 150000 또는 150k"><b>₫</b></div><div class="out" id="cvO">≈ 0원</div>
+   <div class="qk">${[10000,50000,100000,200000,500000,1000000].map(n=>`<button class="mini" data-q="${n}">${n/1e4}만동</button>`).join('')}</div>
+   <div class="rt">1만동 ≈ ${won(10000*rate())} · 1,000원 ≈ ${vnd(1000/rate())}<button class="mini" id="rtU">🔄 환율 새로</button></div></div>`;
+  h+=`<div class="card" style="margin-top:12px"><div class="note">지금까지 쓴 돈</div><div class="big">${won(tot)}</div>`;
+  if(es_.length){const by={};es_.forEach(([k,v])=>by[v.cat||'기타']=(by[v.cat||'기타']||0)+toKRW(v));const mx=Math.max(...Object.values(by));
+    h+=Object.entries(by).sort((a,b)=>b[1]-a[1]).map(([c,v])=>`<div class="bar"><span class="lb">${esc(c)}</span><span class="bg"><i style="width:${v/mx*100}%"></i></span><span class="v">${won(v)}</span></div>`).join('');
+    const pp={};es_.forEach(([k,v])=>{if(v.who)pp[v.who]=(pp[v.who]||0)+toKRW(v)});if(Object.keys(pp).length>1)h+='<div class="note" style="margin-top:8px">💳 '+Object.entries(pp).map(([w,v])=>esc(w)+' '+won(v)).join(' · ')+'</div>'}
+  h+='</div><button class="add" id="addM">＋ 쓴 돈 적기</button>';
+  let last='';for(const [k,v] of es_){if(v.d!==last){last=v.d;h+=`<div class="sec">${v.d?esc(dlabel(v.d)):'날짜 없음'}</div>`}
+    h+=`<div class="row" data-em="${k}"><div class="tx"><b>${esc(v.t||v.cat)}</b><div class="by">${esc(v.cat||'')}${v.who?' · '+esc(v.who)+' 냄':''}</div></div><div style="text-align:right"><b>${won(toKRW(v))}</b>${v.cur!=='KRW'?`<div class="by">${v.cur==='VND'?vnd(v.amt):'$'+v.amt}</div>`:''}</div></div>`}
+  $('#m').innerHTML=h;
+  const cv=()=>{$('#cvO').textContent='≈ '+won(parseAmt($('#cv').value)*rate())};$('#cv').oninput=cv;
+  $$('[data-q]').forEach(b=>b.onclick=()=>{$('#cv').value=(+b.dataset.q).toLocaleString('ko-KR');cv()});
+  $('#rtU').onclick=()=>fetchRate(true);$('#addM').onclick=()=>editMoney(null);$$('[data-em]').forEach(r=>r.onclick=()=>editMoney(r.dataset.em))}
+async function fetchRate(show){try{const r=await fetch('https://open.er-api.com/v6/latest/VND');const j=await r.json();const k=j.rates&&j.rates.KRW;if(k>0.02&&k<0.2){L.rate=k;saveL();if(T&&Math.abs((T.trip.rate||0)-k)/k>0.003)put('trip/rate',+k.toFixed(6));const u=j.rates.USD;if(u)put('trip/usd',Math.round(k/u));if(show)toast('환율을 새로 받았어요');if(S.tab==='money')render()}}catch(e){if(show)toast('인터넷이 안 돼서 저장된 환율을 써요')}}
+function editMoney(k){const v=k?clone(T.money[k]):{cur:'VND',cat:'식비',who:me(),d:days().includes(today())?today():curDay(),t:''};const prev=k?clone(T.money[k]):null;
+  sheet(`<h3>${k?'✏️ 지출 고치기':'💰 쓴 돈 적기'}<button class="x" data-x>✕</button></h3>
+  <div class="f"><label>얼마?</label><div class="addrow" style="margin:0"><input id="mA" inputmode="decimal" value="${v.amt?(+v.amt).toLocaleString('ko-KR'):''}" placeholder="예: 250000 또는 250k" style="font-size:20px;font-weight:800"></div><div class="note" id="mK" style="margin-top:4px"></div></div>
+  <div class="f"><div class="seg" id="mC">${['VND','KRW','USD'].map(c=>`<button data-v="${c}">${c==='VND'?'₫ 동':c==='KRW'?'₩ 원':'$ 달러'}</button>`).join('')}</div></div>
+  <div class="f"><label>무엇에?</label><div class="seg" id="mT">${MCATS.map(c=>`<button data-v="${c}">${c}</button>`).join('')}</div></div>
+  <div class="f"><label>내용</label><input id="mN" value="${esc(v.t||'')}" placeholder="예: 분꽈이 점심"></div>
+  <div class="two"><div class="f"><label>누가 냈나요?</label><select id="mW">${members().map(m=>`<option ${m===v.who?'selected':''}>${esc(m)}</option>`).join('')}</select></div>
+  <div class="f"><label>날짜</label><select id="mD">${days().map(x=>`<option value="${x}" ${x===v.d?'selected':''}>${dlabel(x)}</option>`).join('')}</select></div></div>
+  <div class="btns">${k?'<button class="btn d" id="mDel">🗑️</button>':''}<button class="btn" data-x>취소</button><button class="btn p" id="mSv">저장</button></div>`);
+  const seg=(id,key)=>{$$('#'+id+' button').forEach(b=>{b.classList.toggle('on',b.dataset.v===v[key]);b.onclick=()=>{v[key]=b.dataset.v;seg(id,key);kk()}})};
+  const kk=()=>{const a=parseAmt($('#mA').value);$('#mK').textContent=a?'≈ '+won(toKRW({amt:a,cur:v.cur})):''};
+  seg('mC','cur');seg('mT','cat');$('#mA').oninput=kk;kk();
+  $('#mSv').onclick=()=>{const a=parseAmt($('#mA').value);if(!a){$('#mA').focus();return}const nv={...v,amt:a,t:$('#mN').value.trim(),who:$('#mW').value,d:$('#mD').value,by:me(),at:Date.now()};const id=k||uid();put('money/'+id,nv);closeSheet();toast(k?'저장했어요':'적었어요',()=>put('money/'+id,prev))};
+  if(k)$('#mDel').onclick=()=>{del('money',k);closeSheet()}}
+
+/* 정보 */
+function rInfo(){const dc=Object.entries(T.docs).filter(([k,v])=>v).sort((a,b)=>(a[1].o??999)-(b[1].o??999)||(a[1].at-b[1].at));
+  let h=dc.map(([k,v])=>`<div class="card doc"><div class="r1"><div class="ic">${esc(v.ic||'📌')}</div><div style="flex:1;min-width:0"><div class="ttl">${esc(v.ti)}</div></div><button class="mini" data-ed="${k}">✏️ 고치기</button></div><div class="bd">${linkify(v.bd||'')}</div><div class="by">${byl(v)}</div></div>`).join('');
+  h+='<button class="add" id="addD">＋ 정보 카드 추가 (예약 번호, 연락처…)</button>';
+  h+=`<div class="sec">⚙️ 설정</div>
+  <div class="row"><div class="tx">🙂 나는 <b>${esc(me()||'(아직 안 정함)')}</b></div><button class="mini" id="sMe">바꾸기</button></div>
+  <div class="row"><div class="tx">💬 가족 초대 링크<div class="by">이 링크로 들어오면 같은 여행을 함께 고쳐요</div></div><button class="mini" id="sSh">보내기</button></div>
+  <div class="row"><div class="tx">🧳 여행 이름·날짜·가족</div><button class="mini" id="sTr">고치기</button></div>
+  <div class="row"><div class="tx">🗑️ 휴지통 <small class="note">(${Object.keys(T.trash).length})</small><div class="by">실수로 지운 것 되살리기</div></div><button class="mini" id="sTs">열기</button></div>
+  <div class="row"><div class="tx">📱 홈 화면에 추가<div class="by">아이폰: 사파리 아래 공유 버튼 → 「홈 화면에 추가」<br>갤럭시: 크롬 ⋮ → 「홈 화면에 추가」</div></div></div>
+  ${/KAKAOTALK/i.test(navigator.userAgent)?'<div class="warn">카카오톡 안에서 열려 있어요. <a id="ext" href="#">사파리/크롬으로 열기</a>를 눌러 주세요. 그래야 홈 화면에 추가할 수 있어요.</div>':''}
+  <div class="row"><div class="tx">🔄 새 버전 확인<div class="by">버전 ${APPVER} · 여행 코드 ${esc(CODE)}</div></div><button class="mini" id="sRl">새로고침</button></div>`;
+  $('#m').innerHTML=h;
+  $$('[data-ed]').forEach(b=>b.onclick=()=>editDoc(b.dataset.ed));$('#addD').onclick=()=>editDoc(null);
+  $('#sMe').onclick=pickMe;$('#sSh').onclick=share;$('#sTr').onclick=editTrip;$('#sTs').onclick=trash;$('#sRl').onclick=async()=>{if(!await checkVer(false))location.reload()};
+  if($('#ext'))$('#ext').onclick=e=>{e.preventDefault();location.href='kakaotalk://web/openExternal?url='+encodeURIComponent(location.href)}}
+function editDoc(k){const v=k?clone(T.docs[k]):{ic:'📌',ti:'',bd:''};const prev=k?clone(T.docs[k]):null;
+  sheet(`<h3>${k?'✏️ 정보 고치기':'＋ 정보 카드'}<button class="x" data-x>✕</button></h3>
+  <div class="f"><label>아이콘</label><div class="icp" id="dIc">${['📌','✈️','🏨','🚐','🎟️','⚠️','☎️','💳','🛡️','💊','🍽️','🚌','💆','📝'].map(e=>`<button data-ic="${e}" class="${v.ic===e?'on':''}">${e}</button>`).join('')}</div></div>
+  <div class="f"><label>제목</label><input id="dTi" value="${esc(v.ti)}"></div><div class="f"><label>내용</label><textarea id="dBd" style="min-height:180px">${esc(v.bd)}</textarea></div>
+  <div class="btns">${k?'<button class="btn d" id="dDel">🗑️</button>':''}<button class="btn" data-x>취소</button><button class="btn p" id="dSv">저장</button></div>`);
+  $$('#dIc button').forEach(b=>b.onclick=()=>{v.ic=b.dataset.ic;$$('#dIc button').forEach(x=>x.classList.toggle('on',x===b))});
+  $('#dSv').onclick=()=>{const ti=$('#dTi').value.trim();if(!ti)return $('#dTi').focus();const id=k||uid();put('docs/'+id,{...v,ti,bd:$('#dBd').value,by:me(),at:Date.now()});closeSheet();toast('저장했어요',()=>put('docs/'+id,prev))};
+  if(k)$('#dDel').onclick=()=>{del('docs',k);closeSheet()}}
+function trash(){const tr=Object.entries(T.trash).filter(([k,v])=>v&&v.v).sort((a,b)=>b[1].at-a[1].at);const nm={items:'📅 일정',places:'🍜 장소',pack:'🎒 준비물',money:'💰 경비',docs:'📌 정보'};
+  sheet(`<h3>🗑️ 휴지통<button class="x" data-x>✕</button></h3>${tr.length?tr.map(([k,v])=>`<div class="row"><div class="tx"><b>${esc(v.v.ti||v.v.t||'(이름 없음)')}</b><div class="by">${nm[v.col]||v.col} · ${byl(v)} 지움</div></div><button class="mini" data-rs="${k}">되살리기</button></div>`).join(''):'<div class="empty">비어 있어요</div>'}`);
+  $$('[data-rs]').forEach(b=>b.onclick=()=>{const t=T.trash[b.dataset.rs];put(t.col+'/'+t.id,t.v);put('trash/'+b.dataset.rs,null);toast('되살렸어요');trash()})}
+function editTrip(){const tr=T.trip;
+  sheet(`<h3>🧳 여행 정보<button class="x" data-x>✕</button></h3><div class="f"><label>여행 이름</label><input id="tTi" value="${esc(tr.ti||'')}"></div>
+  <div class="two"><div class="f"><label>첫날</label><input type="date" id="tS" value="${esc(tr.start||'')}"></div><div class="f"><label>마지막 날</label><input type="date" id="tE" value="${esc(tr.end||'')}"></div></div>
+  <div class="f"><label>가족 (쉼표로 구분)</label><input id="tM" value="${esc(members().join(', '))}"></div>
+  <div class="btns"><button class="btn" data-x>취소</button><button class="btn p" id="tSv">저장</button></div>`);
+  $('#tSv').onclick=()=>{const ms=$('#tM').value.split(/[,，]/).map(s=>s.trim()).filter(Boolean).slice(0,12);put('trip',{...tr,ti:$('#tTi').value.trim(),start:$('#tS').value,end:$('#tE').value||$('#tS').value,members:ms});closeSheet()}}
+function pickMe(){sheet(`<h3>🙂 누구세요?<button class="x" data-x>✕</button></h3><p class="note">고친 사람 이름이 「엄마 · 3분 전」처럼 표시돼요. 폰마다 한 번만 고르면 돼요.</p><div class="who">${members().map(m=>`<button data-m="${esc(m)}">${esc(m)}</button>`).join('')}</div>`);
+  $$('[data-m]').forEach(b=>b.onclick=()=>{L.me[CODE]=b.dataset.m;saveL();closeSheet();render();toast('반가워요, '+b.dataset.m+'! 👋')})}
+function share(){const url=location.origin+location.pathname+'#f='+CODE;const text=(T.trip.ti||'가족 여행')+' 일정·맛집·준비물 같이 봐요! 👇\n'+url;
+  if(navigator.share)navigator.share({title:T.trip.ti||'가족 여행',text}).catch(()=>{});else{navigator.clipboard?.writeText(text);toast('링크를 복사했어요. 카톡에 붙여 넣으세요')}}
+
+/* 시트·토스트 */
+function sheet(h){$('#sh').innerHTML=h;$('#ov').classList.add('on');$$('#sh [data-x]').forEach(b=>b.onclick=closeSheet)}
+function closeSheet(){$('#ov').classList.remove('on');if(mmap){mmap.remove();mmap=null;mmk=null}}
+$('#ov').onclick=e=>{if(e.target.id==='ov')closeSheet()};
+let toT;function toast(m,undo){clearTimeout(toT);$('#toT').textContent=m;const b=$('#toB');b.style.display=undo?'':'none';$('#toast').classList.toggle('nu',!undo);b.onclick=()=>{undo&&undo();$('#toast').classList.remove('on');toast('되돌렸어요')};$('#toast').classList.add('on');toT=setTimeout(()=>$('#toast').classList.remove('on'),undo?6000:2200)}
+
+/* 시작 */
+$$('#nav button').forEach(b=>b.onclick=()=>{S.tab=b.dataset.t;L.tab=S.tab;saveL();scrollTo(0,0);render()});
+$('#hMe').onclick=pickMe;$('#hShare').onclick=share;
+function start(){const m=location.hash.match(/f=([a-z0-9]{10,16})/);CODE=m?m[1]:L.code;
+  if(!CODE){$('#m').innerHTML=`<div class="card" style="margin-top:20px"><h2 style="margin-top:0">🧳 우리 가족 여행</h2><p class="note">가족에게 받은 초대 링크로 들어오면 바로 열려요. 코드를 알면 넣어 주세요.</p><div class="addrow"><input id="cI" placeholder="여행 코드"><button id="cB">열기</button></div><p class="note" style="margin-top:16px">새 여행을 시작하려면</p><button class="btn p" id="nB" style="width:100%">＋ 새 여행 만들기</button></div>`;
+    $('#cB').onclick=()=>{const c=$('#cI').value.trim().toLowerCase();if(/^[a-z0-9]{10,16}$/.test(c)){location.hash='f='+c;start()}else toast('코드를 다시 확인해 주세요')};
+    $('#nB').onclick=()=>{const c=(uid()+uid()).toLowerCase().replace(/[^a-z0-9]/g,'').slice(0,12);location.hash='f='+c;CODE=c;L.code=c;T=emptyT();const s=today();T.trip={ti:'우리 가족 여행',start:s,end:s,members:['엄마','아빠']};put('trip',T.trip);start();setTimeout(editTrip,300)};return}
+  L.code=CODE;saveL();if(location.hash!=='#f='+CODE)history.replaceState(null,'',location.pathname+'#f='+CODE);
+  T=norm(clone(L.cache[CODE])||emptyT());render();fetch(DB+CODE+'.json').then(r=>r.json()).then(d=>{if(d)remote('/',d,false)}).catch(()=>{});if(!/nosse/.test(location.search))connect();flush();fetchRate(false);
+  setTimeout(()=>{if(!me()&&CODE)pickMe()},900)}
+addEventListener('hashchange',()=>{const m=location.hash.match(/f=([a-z0-9]{10,16})/);if(m&&m[1]!==CODE)start()});
+let verBusy=false;
+async function checkVer(auto){if(verBusy)return;verBusy=true;try{const r=await fetch(location.pathname+'?vc='+Date.now(),{cache:'no-store'});const t=await r.text();const m=t.match(/const APPVER='([^']+)'/);
+  if(m&&m[1]!==APPVER){if(auto&&($('#ov').classList.contains('on')||/INPUT|TEXTAREA/.test(document.activeElement?.tagName)))return;location.reload();return true}}catch(e){}finally{verBusy=false}return false}
+setInterval(()=>{checkVer(true);if(S.tab==='plan'&&!$('#ov').classList.contains('on'))render()},5*60*1000);
+if('serviceWorker' in navigator)navigator.serviceWorker.register('sw.js').catch(()=>{});
+start();
+</script>
+</body>
+</html>
